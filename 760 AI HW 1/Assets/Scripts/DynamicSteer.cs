@@ -66,7 +66,7 @@ public class DynamicSteer : MonoBehaviour
         // Generate vector for new velocity
         currentVelocity = new Vector3(
             currentVelocity.x + acceleration.x * Time.deltaTime,
-            0,
+            currentVelocity.y + acceleration.y * Time.deltaTime,
             currentVelocity.z + acceleration.z * Time.deltaTime
             );
 
@@ -83,9 +83,15 @@ public class DynamicSteer : MonoBehaviour
         // Return if not moving
         if (velocity.magnitude == 0)
             return;
-
+        transform.rotation = Quaternion.LookRotation(velocity.normalized, rigidBody.transform.up);
         // Calculate the angle to turn towards and apply to rotation
-        float turnAngle = Mathf.Atan2(velocity.z, velocity.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(new Vector3(0, turnAngle, 0));
+        //float turnAngle = Mathf.Atan2(velocity.z, velocity.x) * Mathf.Rad2Deg;
+        //transform.rotation = Quaternion.Euler(new Vector3(0, -turnAngle, 0));
+    }
+
+    // Method for getting current speed value
+    public float GetCurrentSpeed()
+    {
+        return rigidBody.velocity.magnitude;
     }
 }

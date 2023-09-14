@@ -4,7 +4,13 @@ using UnityEngine;
 
 public class PlayerCharacter : MonoBehaviour
 {
-    // Camera being used
+    // Get the animator instance
+    private Animator animator;
+
+    // Declare any animation hashes here
+    int speedHash;
+
+    // Get the camera being used
     public Camera camera;
 
     // Get the Dynamic Steering component to handle player movement
@@ -17,6 +23,10 @@ public class PlayerCharacter : MonoBehaviour
         // Init controls and target
         movementControls = gameObject.GetComponent<DynamicSteer>();
         currentTarget = transform.position;
+
+        // Init animator reference and hashes
+        animator = gameObject.GetComponent<Animator>();
+        speedHash = Animator.StringToHash("Speed");
     }
 
     // Update is called once per frame
@@ -37,5 +47,10 @@ public class PlayerCharacter : MonoBehaviour
 
         // Make the player move to the target
         movementControls.Steer(currentTarget);
+
+        // Update speed hash with current speed
+        animator.SetFloat(speedHash, movementControls.GetCurrentSpeed() / movementControls.maxSpeed);
+
+        //Debug.Log(movementControls.GetCurrentSpeed() / movementControls.maxSpeed);
     }
 }
