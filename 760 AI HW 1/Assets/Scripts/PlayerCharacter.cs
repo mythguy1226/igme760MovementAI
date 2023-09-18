@@ -10,8 +10,10 @@ public class PlayerCharacter : MonoBehaviour
     // Declare any animation hashes here
     int speedHash;
 
-    // Get the camera being used
+    // Public fields to set in editor
     public Camera camera;
+    public LayerMask traversalMask;
+    public GameObject targetObject;
 
     // Get the Dynamic Steering component to handle player movement
     private DynamicSteer movementControls;
@@ -35,14 +37,8 @@ public class PlayerCharacter : MonoBehaviour
         // Mouse click input
         if(Input.GetKeyDown(KeyCode.Mouse0))
         {
-            // Trace a ray from the camera to the world
-            // where the mouse is pointing
-            Ray ray = camera.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {
-                // Set the target to the hit position
-                currentTarget = hit.point;
-            }
+            // Set the current target
+            currentTarget = GetTargetPoint();
         }
 
         // Make the player move to the target
@@ -51,6 +47,43 @@ public class PlayerCharacter : MonoBehaviour
         // Update speed hash with current speed
         animator.SetFloat(speedHash, movementControls.GetCurrentSpeed() / movementControls.maxSpeed);
 
-        //Debug.Log(movementControls.GetCurrentSpeed() / movementControls.maxSpeed);
+        // Continuously rotate the target
+        targetObject.transform.rotation *= Quaternion.AngleAxis(0.1f, new Vector3(0.0f, 0.0f, 1.0f));
+    }
+
+    // Method called for UI drawing
+    private void OnGUI()
+    {
+        // Draw the target sprite to where the player is going or looking to go
+        if(targetObject != null)
+        {
+            // Create vector for slight offset, making target more visible
+            Vector3 offset = new Vector3(0.0f, 2.0f, 0.0f);
+
+            // Moving
+            if(movementControls.GetCurrentSpeed() > 0)
+            {
+                targetObject.transform.position = currentTarget;
+            }
+            else // Not Moving
+            {
+                targetObject.transform.position = GetTargetPoint();
+            }
+        }
+    }
+
+    private Vector3 GetTargetPoint()
+    {
+        // Trace a ray from the camera to the world
+        // where the mouse is pointing
+        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, traversalMask))
+        {
+            // Return the hit point
+            return hit.point;
+        }
+
+        // Return out of player view if not a proper target point
+        return new Vector3(0, -50, 0);
     }
 }
